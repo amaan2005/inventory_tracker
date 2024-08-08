@@ -9,6 +9,19 @@ export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredItems, setFilteredItems] = useState([]);
+
+  useEffect(() => {
+     if (searchQuery) {
+       const filtered = inventory.filter(item => 
+         item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+         setFilteredItems(filtered);
+     } else {
+       setFilteredItems(inventory);
+     }
+   }, [searchQuery, inventory])
+   
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, 'inventory'));
     const docs = await getDocs(snapshot);
@@ -93,7 +106,14 @@ export default function Home() {
         handleOpen()
       }}>
        Add New Item</Button>
-       <Box border='1px solid #333'>
+       <TextField
+        sx={{width: 800}}
+        variant="outlined"
+        label="Search items"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+      <Box border='1px solid #333'>
        <Box 
        width="800px"
        height="100px"
@@ -106,7 +126,7 @@ export default function Home() {
        </Box>
     <Stack width="800px" height="300px" spacing={2} overflow="auto">
       {
-        inventory.map(({name, quantity})=>(
+        filteredItems.map(({name, quantity})=>(
           <Box 
           key={name}
           width="100%" 
